@@ -298,6 +298,7 @@ aisecuritygateway/
 - **No telemetry** — zero external calls, no analytics, no phone-home
 - **Secret scrubbing** — structured logs automatically mask API keys and tokens
 - **Rate limiting** — token bucket per API key (default 10 req/sec)
+- **CORS** — defaults to `*` for local development; restrict `CORS_ORIGINS` to your domain(s) and place behind a reverse proxy (e.g. Nginx, Caddy) in production
 
 ---
 
