@@ -1,0 +1,37 @@
+services:
+  gateway:
+    build: ./proxy-api
+    ports:
+      - "${GATEWAY_PORT:-8000}:8000"
+    environment:
+      - PRESIDIO_URL=http://presidio:3000
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - CONFIG_PATH=/app/config/gateway.yaml
+    env_file:
+      - .env
+    volumes:
+      - ./config:/app/config:ro
+    depends_on:
+      presidio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  presidio:
+    build: ./presidio
+    expose:
+      - "3000"
+    environment:
+      - PORT=3000
+      - WEB_CONCURRENCY=${PRESIDIO_WORKERS:-1}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:3000/health').raise_for_status()"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped

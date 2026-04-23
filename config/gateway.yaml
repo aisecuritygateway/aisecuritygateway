@@ -1,0 +1,31 @@
+# ── AISG Gateway Configuration ────────────────────────────────────────────────
+#
+# Environment variables: ${VAR} or ${VAR:-default}
+
+providers:
+  groq:
+    api_key: "${GROQ_API_KEY}"
+  openai:
+    api_key: "${OPENAI_API_KEY:-}"
+
+api_keys:
+  - key: "${AISG_API_KEY:-dev-key-change-me}"
+    name: "default"
+
+dlp:
+  action: redact
+  confidence_threshold: 0.4
+  entities:
+    - EMAIL_ADDRESS
+    - PHONE_NUMBER
+    - CREDIT_CARD
+    - US_SSN
+    - PERSON
+    - LOCATION
+    - IP_ADDRESS
+    - API_KEY
+    - AWS_ACCESS_KEY
+    - PRIVATE_KEY
+    - GITHUB_TOKEN
+    - SLACK_WEBHOOK
+    - PROMPT_INJECTION

@@ -1,0 +1,14 @@
+{
+  "providers": {
+    "groq": {
+      "litellm_prefix": "groq",
+      "default_model": "llama-3.3-70b-versatile",
+      "enabled": true
+    },
+    "openai": {
+      "litellm_prefix": "openai",
+      "default_model": "gpt-4o-mini",
+      "enabled": true
+    }
+  }
+}

@@ -1,0 +1,88 @@
+# ── AISG Presidio — Custom Recognizers (OSS Core) ─────────────────────────────
+#
+# These are loaded in addition to Presidio's built-in recognizers
+# (EMAIL_ADDRESS, PHONE_NUMBER, CREDIT_CARD, US_SSN, IP_ADDRESS, IBAN_CODE, PERSON, etc.)
+#
+# ──────────────────────────────────────────────────────────────────────────────
+
+# ── Developer Secrets ─────────────────────────────────────────────────────────
+
+- name: ApiKeyRecognizer
+  supported_entity: API_KEY
+  supported_language: en
+  patterns:
+    - name: openai_key
+      regex: 'sk-[a-zA-Z0-9]{20,}'
+      score: 0.9
+    - name: anthropic_key
+      regex: 'sk-ant-[a-zA-Z0-9]{20,}'
+      score: 0.9
+    - name: google_ai_key
+      regex: 'AIza[0-9A-Za-z\-_]{35}'
+      score: 0.9
+
+- name: AwsAccessKeyRecognizer
+  supported_entity: AWS_ACCESS_KEY
+  supported_language: en
+  patterns:
+    - name: aws_access_key_id
+      regex: 'AKIA[0-9A-Z]{16}'
+      score: 0.95
+
+- name: PrivateKeyRecognizer
+  supported_entity: PRIVATE_KEY
+  supported_language: en
+  patterns:
+    - name: pem_private_key
+      regex: '-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----'
+      score: 0.95
+    - name: ssh_private_key
+      regex: '-----BEGIN OPENSSH PRIVATE KEY-----'
+      score: 0.95
+
+- name: GitHubTokenRecognizer
+  supported_entity: GITHUB_TOKEN
+  supported_language: en
+  patterns:
+    - name: github_pat
+      regex: 'ghp_[A-Za-z0-9]{36}'
+      score: 0.95
+    - name: github_oauth
+      regex: 'gho_[A-Za-z0-9]{36}'
+      score: 0.95
+    - name: github_fine_grained
+      regex: 'github_pat_[A-Za-z0-9_]{82}'
+      score: 0.95
+
+- name: SlackWebhookRecognizer
+  supported_entity: SLACK_WEBHOOK
+  supported_language: en
+  patterns:
+    - name: slack_webhook
+      regex: 'https://hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[a-zA-Z0-9]+'
+      score: 0.95
+
+# ── Prompt Injection / Jailbreak Detection ────────────────────────────────────
+#
+# Core patterns only — covers the 5 most common attack vectors.
+# Cloud/premium version includes extended injection library.
+
+- name: PromptInjectionRecognizer
+  supported_entity: PROMPT_INJECTION
+  supported_language: en
+  patterns:
+    - name: ignore_previous
+      regex: '(?i)ignore\s+(all\s+)?(previous|prior|above|earlier|preceding)\s+(instructions?|rules?|prompts?|directives?|guidelines?|constraints?)'
+      score: 0.85
+    - name: disregard_instructions
+      regex: '(?i)(disregard|forget|override|bypass|skip|drop)\s+(all\s+)?(previous|prior|above|your|the|system)?\s*(instructions?|rules?|prompts?|guidelines?|constraints?|programming|training)'
+      score: 0.85
+    - name: reveal_system_prompt
+      regex: '(?i)(reveal|show|display|print|output|repeat|echo|tell\s+me|give\s+me|what\s+(is|are))\s+(your|the)\s+(system|initial|original|hidden|secret|internal)\s*(prompt|instructions?|rules?|message|configuration|directives?)'
+      score: 0.9
+    - name: dan_jailbreak
+      regex: '(?i)(you\s+are|act\s+as|pretend\s+(to\s+be|you\s+are)|roleplay\s+as|imagine\s+you\s+are|from\s+now\s+on\s+you\s+are)\s+(DAN|an?\s+unrestricted|an?\s+uncensored|an?\s+unfiltered|a\s+jailbroken|evil|Developer\s*Mode|god\s*mode)'
+      score: 0.9
+    - name: developer_mode
+      regex: '(?i)(enable|activate|enter|switch\s+to|turn\s+on)\s+(developer|debug|admin|god|unrestricted|jailbreak|sudo)\s*(mode|access)'
+      score: 0.85
