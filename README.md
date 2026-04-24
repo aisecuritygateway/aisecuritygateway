@@ -1,9 +1,11 @@
 [![Cloud](https://img.shields.io/badge/Managed_Cloud-aisecuritygateway.ai-blue)](https://aisecuritygateway.ai)
 # AISG — AI Security Gateway
 
-**Stop sensitive data from leaking into LLM prompts.**
+**Control and govern AI usage across providers — not just inside one platform.**
 
-AISG is the self-hosted, open-source version of [AI Security Gateway](https://aisecuritygateway.ai) — an OpenAI-compatible proxy that acts as an AI firewall. It scans every request for PII, secrets, and prompt injection attacks before sending it to an LLM provider.
+AISG is a vendor-neutral AI governance layer that sits between your application and any LLM. It enforces PII redaction, blocks prompt injection, detects secret leaks, and controls spend — before data leaves your system. Self-hosted, open-source, Apache 2.0.
+
+> *Don't trust black-box safety. Verify it. Run the same enforcement layer inside your VPC.*
 
 - **PII redaction** — scans text prompts for emails, phone numbers, credit cards, SSNs, and more
 - **Secret detection** — API keys, AWS credentials, GitHub tokens, private keys
