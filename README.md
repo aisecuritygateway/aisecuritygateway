@@ -1,6 +1,6 @@
 [![Managed Cloud](https://img.shields.io/badge/Managed_Cloud-aisecuritygateway.ai-blue)](https://aisecuritygateway.ai)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/aisecuritygateway/aisecuritygateway/blob/main/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/aisecuritygateway/aisecuritygateway?style=social)](https://github.com/aisecuritygateway/aisecuritygateway)
+[![GitHub Stars](https://img.shields.io/github/stars/aisecuritygateway/aisecuritygateway?style=flat&color=gold)](https://github.com/aisecuritygateway/aisecuritygateway/stargazers)
 [![Last Commit](https://img.shields.io/github/last-commit/aisecuritygateway/aisecuritygateway)](https://github.com/aisecuritygateway/aisecuritygateway/commits/main)
 [![OpenAI Compatible](https://img.shields.io/badge/OpenAI_SDK-Compatible-10a37f?logo=openai&logoColor=white)](https://aisecuritygateway.ai/docs/openai-compatible-proxy)
 
