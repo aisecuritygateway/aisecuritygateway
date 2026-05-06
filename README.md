@@ -12,6 +12,8 @@ AISG is a vendor-neutral AI governance layer that sits between your application 
 
 > *Your LLM provider should never see your users' emails, SSNs, or API keys. AISG makes sure it doesn't.*
 
+> **Prefer zero setup?** Try the managed cloud version free → [aisecuritygateway.ai](https://aisecuritygateway.ai) — 1M credits, no credit card required.
+
 ### Why AISG?
 
 - **PII redaction** — emails, phone numbers, credit cards, SSNs, names, locations, IP addresses
