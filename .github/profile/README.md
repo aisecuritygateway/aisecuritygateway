@@ -1,21 +1,21 @@
 <p align="center">
   <a href="https://github.com/aisecuritygateway/aisecuritygateway">
-    <img alt="AI Security Gateway" src="https://aisecuritygateway.ai/og.jpg" width="600" />
+    <img alt="AI Security Gateway" src="https://aisecuritygateway.ai/og.png" width="600" />
   </a>
 </p>
 
-<h3 align="center">The Open-Source AI Firewall</h3>
+<h3 align="center">The Open-Source AI Firewall & LLM Proxy</h3>
 
 <p align="center">
-  Stop sensitive data from leaking into LLM prompts.<br />
-  PII redaction · Secret detection · Prompt injection blocking · Self-hosted via Docker.
+  Stop sensitive data from leaking into LLM prompts. Drop-in OpenAI SDK compatible.<br />
+  PII redaction · Secret detection · Prompt injection blocking · Self-hosted via Docker · Apache 2.0
 </p>
 
 <p align="center">
   <a href="https://github.com/aisecuritygateway/aisecuritygateway"><strong>Get Started</strong></a> ·
   <a href="https://aisecuritygateway.ai/docs"><strong>Docs</strong></a> ·
   <a href="https://aisecuritygateway.ai/open-source"><strong>OSS vs Cloud</strong></a> ·
-  <a href="https://aisecuritygateway.ai"><strong>Managed Cloud</strong></a>
+  <a href="https://aisecuritygateway.ai"><strong>Managed Cloud (1M free credits)</strong></a>
 </p>
 
 <p align="center">
@@ -53,9 +53,11 @@ AISG is an **OpenAI-compatible proxy** that acts as an AI firewall. It sits betw
 - **PII Redaction** — emails, phone numbers, credit cards, SSNs, names, locations, IP addresses
 - **Secret Detection** — API keys, AWS credentials, GitHub tokens, private keys, Slack webhooks
 - **Prompt Injection Blocking** — detects jailbreak and instruction override attempts
-- **Multi-Provider Routing** — OpenAI-compatible API, BYOK, swap providers in config
+- **OpenAI SDK Compatible** — drop-in replacement, change one line of code
+- **Multi-Provider Routing** — BYOK, swap providers in config
 - **Fail-Closed Security** — if the safety layer is down, requests are **blocked**, never forwarded unscanned
 - **Zero Cloud Dependencies** — runs entirely on your machine via Docker
+- **No Telemetry** — zero external calls, no analytics, no phone-home
 
 ---
 
@@ -111,31 +113,40 @@ The gateway redacts the email and SSN before forwarding. The response includes `
 
 This repo gives you the core AI security proxy. The managed [AI Security Gateway Cloud](https://aisecuritygateway.ai) adds everything you need to run it across teams at scale.
 
-|  | OSS (this repo) | [Cloud](https://aisecuritygateway.ai) |
+| | OSS (this repo) | [Cloud](https://aisecuritygateway.ai) |
 |---|:---:|:---:|
 | PII detection & redaction (text) | 13 entity types | 28+ entity types |
 | OCR image scanning | — | Yes |
-| Secret leak prevention | 6 recognizers | Extended (incl. AWS Secret Key, crypto, MAC) |
+| Secret leak prevention | 5 recognizers | Extended (incl. AWS Secret Key, crypto, MAC) |
 | Prompt injection blocking | 5 core patterns | Extended pattern library |
-| Multi-provider routing (BYOK) | 2 providers | 8+ providers |
+| Routing | Header-based (`x-provider`) | Smart Router + real-time pricing |
+| Failover | — | Automatic intelligent chains |
+| Cost optimization | — | Automatic (cheapest per request) |
+| Budget enforcement | — | Per-project caps + alerts + analytics |
 | Self-hosted | Yes | Managed |
 | Multi-project management | — | Yes |
-| Project-level DLP policies & budgets | — | Yes |
+| Project-level DLP policies | — | Yes |
 | Dashboards, leak reports & analytics | — | Yes |
-| SLA & support | Community | Yes |
-| Auto cost-optimization across 8 providers | — | Yes |
 | Real-time model pricing registry | — | Yes |
 | Managed provider keys (no BYOK required) | — | Yes |
-| Automatic failover chains | — | Yes |
+| SLA & support | Community | Yes |
 
-> **Skip the setup?** The managed version at [aisecuritygateway.ai](https://aisecuritygateway.ai) gives you everything here plus dashboards, multi-project policies, and 8 providers — no Docker required.
+> **Skip the setup?** [aisecuritygateway.ai](https://aisecuritygateway.ai) — everything here plus dashboards, smart cost routing, and 8+ providers. 1M free credits, no credit card.
+
+---
+
+<p align="center">
+  <a href="https://theresanaiforthat.com/ai/aisecuritygateway/?ref=featured&v=7352275" rel="nofollow noopener noreferrer">
+    <img width="200" src="https://media.theresanaiforthat.com/featured-on-taaft.png?width=600" alt="Featured on There's An AI For That" />
+  </a>
+</p>
 
 ---
 
 <p align="center">
   <a href="https://github.com/aisecuritygateway/aisecuritygateway"><strong>⭐ Star the repo</strong></a> ·
   <a href="https://aisecuritygateway.ai/open-source"><strong>Learn more</strong></a> ·
-  <a href="https://aisecuritygateway.ai"><strong>Try the managed cloud</strong></a>
+  <a href="https://aisecuritygateway.ai"><strong>Try the managed cloud free</strong></a>
 </p>
 
 <p align="center">

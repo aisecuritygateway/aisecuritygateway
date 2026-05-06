@@ -1,17 +1,27 @@
-[![Cloud](https://img.shields.io/badge/Managed_Cloud-aisecuritygateway.ai-blue)](https://aisecuritygateway.ai)
+[![Managed Cloud](https://img.shields.io/badge/Managed_Cloud-aisecuritygateway.ai-blue)](https://aisecuritygateway.ai)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/aisecuritygateway/aisecuritygateway/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/aisecuritygateway/aisecuritygateway?style=social)](https://github.com/aisecuritygateway/aisecuritygateway)
+[![Last Commit](https://img.shields.io/github/last-commit/aisecuritygateway/aisecuritygateway)](https://github.com/aisecuritygateway/aisecuritygateway/commits/main)
+[![OpenAI Compatible](https://img.shields.io/badge/OpenAI_SDK-Compatible-10a37f?logo=openai&logoColor=white)](https://aisecuritygateway.ai/docs/openai-compatible-proxy)
+
 # AISG — AI Security Gateway
 
-**Control and govern AI usage across providers — not just inside one platform.**
+### Open-source AI firewall & LLM proxy with built-in PII redaction, prompt injection blocking, and secret leak prevention.
 
-AISG is a vendor-neutral AI governance layer that sits between your application and any LLM. It enforces PII redaction, blocks prompt injection, detects secret leaks, and controls spend — before data leaves your system. Self-hosted, open-source, Apache 2.0.
+AISG is a vendor-neutral AI governance layer that sits between your application and any LLM provider. It scans every request for sensitive data and attacks — and redacts or blocks them before anything reaches the model. Self-hosted via Docker, OpenAI SDK compatible, Apache 2.0.
 
-> *Don't trust black-box safety. Verify it. Run the same enforcement layer inside your VPC.*
+> *Your LLM provider should never see your users' emails, SSNs, or API keys. AISG makes sure it doesn't.*
 
-- **PII redaction** — scans text prompts for emails, phone numbers, credit cards, SSNs, and more
+### Why AISG?
+
+- **PII redaction** — emails, phone numbers, credit cards, SSNs, names, locations, IP addresses
 - **Secret detection** — API keys, AWS credentials, GitHub tokens, private keys
 - **Prompt injection blocking** — detects jailbreak and instruction override attempts
-- **Multi-provider routing** — OpenAI-compatible API, BYOK, swap providers in config
+- **OpenAI SDK compatible** — drop-in replacement, change one line of code
+- **Multi-provider routing** — BYOK, swap providers in config
+- **Fail-closed by default** — if the safety layer is down, requests are blocked, never forwarded unscanned
 - **Zero cloud dependencies** — runs entirely on your machine via Docker
+- **No telemetry** — zero external calls, no analytics, no phone-home
 
 ```
 Your App  ──▸  AISG Gateway  ──▸  Presidio (PII scan)  ──▸  LLM Provider
@@ -19,11 +29,23 @@ Your App  ──▸  AISG Gateway  ──▸  Presidio (PII scan)  ──▸  LL
                     │◂── redacted or blocked ──────────────────▸│
                     │◂── clean response ────────────────────────│
 ```
----
-
-> ☁️ **Prefer managed?** Skip Docker entirely → [aisecuritygateway.ai](https://aisecuritygateway.ai) — 1M free requests, no credit card required.
 
 ---
+
+### Who is this for?
+
+| Use case | How AISG helps |
+|---|---|
+| **Building AI features into your app** | Prevent user PII from leaking into LLM prompts — emails, SSNs, credit cards auto-redacted |
+| **Using ChatGPT/Claude APIs in production** | Drop-in proxy that adds security without changing your code |
+| **Internal AI tools for your team** | Stop employees from accidentally pasting secrets, credentials, or customer data |
+| **Regulated industries (healthcare, finance, legal)** | Auditable DLP layer that blocks sensitive data before it leaves your infrastructure |
+| **AI agent / RAG pipelines** | Scan every step of multi-hop agent calls for PII and injection attacks |
+
+---
+
+> ☁️ **Want it managed?** Skip Docker entirely → [aisecuritygateway.ai](https://aisecuritygateway.ai) — 1M free credits, no credit card, 300+ models, 8+ providers.
+
 ---
 
 ## Quickstart
@@ -75,10 +97,30 @@ curl http://localhost:8000/v1/chat/completions \
 The gateway redacts the email and SSN before forwarding to the LLM. The response
 includes `aisg_metadata.pii_detected: true` and details about what was found.
 
+**4. Use with the OpenAI SDK (Python)**
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:8000/v1",
+    api_key="change-me-to-a-real-secret",
+)
+
+response = client.chat.completions.create(
+    model="llama-3.3-70b-versatile",
+    messages=[{"role": "user", "content": "My SSN is 123-45-6789. What is machine learning?"}],
+)
+print(response.choices[0].message.content)
+# The LLM never saw the SSN — it was redacted before forwarding.
+```
+
 ---
-> **Skip the setup?** The managed version at [aisecuritygateway.ai](https://aisecuritygateway.ai) 
-> gives you everything here plus dashboards, multi-project policies, and 8 providers — 
-> no Docker required. First 1M requests free.
+
+> **Skip the setup?** The managed version at [aisecuritygateway.ai](https://aisecuritygateway.ai)
+> gives you everything here plus dashboards, multi-project policies, smart cost routing, and 8+ providers —
+> no Docker required. 1M free credits, no credit card.
+
 ---
 
 ## How It Works
@@ -340,7 +382,15 @@ This repo gives you the core AI security proxy. The managed [AI Security Gateway
 | Managed provider keys (no BYOK required) | — | Yes |
 | SLA & support | Community | Yes |
 
-[Learn more about the managed version &rarr;](https://aisecuritygateway.ai)
+[Try the managed cloud free &rarr;](https://aisecuritygateway.ai) — 1M free credits, no credit card required.
+
+---
+
+## Featured On
+
+<a href="https://theresanaiforthat.com/ai/aisecuritygateway/?ref=featured&v=7352275" target="_blank" rel="nofollow noopener noreferrer">
+  <img width="200" src="https://media.theresanaiforthat.com/featured-on-taaft.png?width=600" alt="Featured on There's An AI For That" />
+</a>
 
 ---
 
@@ -355,6 +405,10 @@ Found a vulnerability? Please read [SECURITY.md](SECURITY.md) for responsible di
 ## License
 
 [Apache 2.0](LICENSE) — Copyright 2026 Datum Fuse LLC
+
+---
+
+### ⭐ If AISG is useful, consider starring the repo — it helps others discover it.
 
 ---
 
