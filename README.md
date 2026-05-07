@@ -46,7 +46,7 @@ Your App  ──▸  AISG Gateway  ──▸  Presidio (PII scan)  ──▸  LL
 
 ---
 
-> ☁️ **Want it managed?** Skip Docker entirely → [aisecuritygateway.ai](https://aisecuritygateway.ai) — 1M free credits, no credit card, 300+ models, 8+ providers.
+> ☁️ **Want it managed?** Skip Docker entirely → [aisecuritygateway.ai](https://aisecuritygateway.ai) — 1M free credits, no credit card, 600+ models, 8+ providers.
 
 ---
 
