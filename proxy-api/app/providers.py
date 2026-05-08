@@ -117,3 +117,54 @@ async def forward_chat_completion(
         kwargs["api_base"] = base_url_override.rstrip("/")
 
     return await litellm.acompletion(**kwargs)
+
+
+async def forward_chat_completion_stream(
+    provider: ProviderSpec,
+    api_key: str,
+    body: dict[str, Any],
+    *,
+    base_url_override: str | None = None,
+):
+    """Call the upstream LLM via LiteLLM with streaming enabled.
+
+    Returns an async generator that yields ``ModelResponseStream`` chunks.
+    """
+    raw_model = body.pop("model", "")
+    model_str = litellm_model_name(provider, raw_model)
+    timeout = get_settings().upstream_timeout_seconds
+
+    log.info("upstream_forward_stream", provider=provider.name, litellm_model=model_str)
+
+    _KNOWN_COMPLETION_PARAMS = {
+        "messages", "temperature", "top_p", "max_tokens", "max_completion_tokens",
+        "stop", "stream", "stream_options", "n",
+        "presence_penalty", "frequency_penalty",
+        "logit_bias", "logprobs", "top_logprobs",
+        "user", "seed",
+        "tools", "tool_choice", "functions", "function_call",
+        "parallel_tool_calls",
+        "response_format",
+        "reasoning_effort",
+        "thinking",
+        "top_k",
+        "extra_headers",
+        "service_tier",
+    }
+    clean_body = {k: v for k, v in body.items() if k in _KNOWN_COMPLETION_PARAMS}
+
+    clean_body["stream"] = True
+    if "stream_options" not in clean_body or clean_body.get("stream_options") is None:
+        clean_body["stream_options"] = {"include_usage": True}
+
+    kwargs: dict[str, Any] = {
+        "model": model_str,
+        "timeout": timeout,
+        "api_key": api_key,
+        **clean_body,
+    }
+
+    if base_url_override:
+        kwargs["api_base"] = base_url_override.rstrip("/")
+
+    return await litellm.acompletion(**kwargs)

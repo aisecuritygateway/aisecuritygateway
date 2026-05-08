@@ -191,15 +191,17 @@ class TestChatCompletionsAuth:
 class TestChatCompletionsValidation:
     """Input validation before auth and DLP."""
 
-    def test_streaming_rejected(self, client):
+    def test_streaming_not_rejected(self, client):
+        """Streaming requests proceed through auth/DLP (not rejected at the gate)."""
         with _ctx():
             resp = client.post(
                 "/v1/chat/completions",
                 json=_chat_body(stream=True),
                 headers={"Authorization": "Bearer test-key"},
             )
-            assert resp.status_code == 400
-            assert "streaming" in str(resp.json()["detail"]).lower()
+            detail = resp.json().get("detail", "")
+            detail_str = str(detail).lower()
+            assert "streaming_not_supported" not in detail_str
 
     def test_empty_last_message_rejected(self, client):
         with _ctx():

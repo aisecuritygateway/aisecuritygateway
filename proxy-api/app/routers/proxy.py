@@ -11,6 +11,7 @@ Request lifecycle:
 
 from __future__ import annotations
 
+import json
 import time
 import uuid
 from typing import Any
@@ -18,7 +19,7 @@ from typing import Any
 import litellm
 import structlog
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from .. import dlp, providers
 from ..auth import authenticate
@@ -54,16 +55,6 @@ async def chat_completions(
     rlog = log.bind(request_id=request_id, client_ip=client_ip)
 
     # ── 0. Validate request ──────────────────────────────────────────────────
-    if body.stream:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "error": "streaming_not_supported",
-                "message": "Streaming is not yet supported. The AI Firewall scans the full "
-                "request for PII before forwarding. Please set stream: false.",
-            },
-        )
-
     if not body.messages:
         raise HTTPException(status_code=400, detail={"error": "invalid_request", "message": "messages array must not be empty."})
 
@@ -194,6 +185,63 @@ async def chat_completions(
     upstream_body = body.model_dump(exclude_none=True)
     upstream_start = time.monotonic()
 
+    # ── 5a. Streaming path ────────────────────────────────────────────────
+    if body.stream:
+        try:
+            stream_response = await providers.forward_chat_completion_stream(
+                provider_spec, api_key, dict(upstream_body),
+            )
+        except litellm.exceptions.Timeout:
+            rlog.error("upstream_timeout", provider=provider_name, exc_info=True)
+            raise HTTPException(status_code=504, detail="The AI provider took too long to respond. Please try again.")
+        except litellm.exceptions.AuthenticationError:
+            rlog.error("upstream_auth_error", provider=provider_name, exc_info=True)
+            raise HTTPException(status_code=502, detail="Your API key was rejected by the provider. Check gateway.yaml.")
+        except litellm.exceptions.BadRequestError as exc:
+            rlog.error("upstream_bad_request", provider=provider_name, detail=str(exc)[:300])
+            raise HTTPException(status_code=400, detail={"error": "upstream_bad_request", "message": str(exc)[:500]})
+        except Exception:
+            rlog.exception("upstream_unexpected_error")
+            raise HTTPException(status_code=502, detail={"error": "upstream_error", "message": f"Could not complete request to '{provider_name}'. Please retry."})
+
+        async def _sse_generator():
+            try:
+                async for chunk in stream_response:
+                    chunk_dict = chunk.model_dump() if hasattr(chunk, "model_dump") else dict(chunk)
+                    chunk_dict["model"] = model_name
+                    yield f"data: {json.dumps(chunk_dict)}\n\n"
+                yield "data: [DONE]\n\n"
+            except Exception:
+                rlog.exception("stream_chunk_error", provider=provider_name)
+                yield f"data: {json.dumps({'error': {'message': 'Stream interrupted', 'type': 'server_error'}})}\n\n"
+                yield "data: [DONE]\n\n"
+            finally:
+                _now = time.monotonic()
+                rlog.info(
+                    "stream_completed",
+                    status_code=200,
+                    provider=provider_name,
+                    model=model_name,
+                    latency_ms=int((_now - start) * 1000),
+                    dlp_latency_ms=dlp_latency_ms,
+                    pii_detected=pii_detected,
+                    is_streaming=True,
+                )
+
+        return StreamingResponse(
+            _sse_generator(),
+            media_type="text/event-stream",
+            headers={
+                "x-request-id": request_id,
+                "x-aisg-latency": str(int((time.monotonic() - start) * 1000)),
+                "x-dlp-latency": str(dlp_latency_ms),
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no",
+            },
+        )
+
+    # ── 5b. Non-streaming path ────────────────────────────────────────────
     try:
         response: litellm.ModelResponse = await providers.forward_chat_completion(
             provider_spec, api_key, upstream_body,
