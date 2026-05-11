@@ -16,3 +16,8 @@ httpx~=0.28.0
 
 # Development/Testing
 pytest~=8.3.0
+
+# Transitive dependency pins — security fixes
+urllib3>=1.26.19
+filelock>=3.20.1
+requests>=2.32.2
