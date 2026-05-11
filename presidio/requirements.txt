@@ -16,6 +16,8 @@ httpx~=0.28.0
 
 # Development/Testing
 pytest~=8.3.0
-urllib3>=1.26.19 # not directly required, pinned by Snyk to avoid a vulnerability
-filelock>=3.20.1 # not directly required, pinned by Snyk to avoid a vulnerability
-requests>=2.32.2 # not directly required, pinned by Snyk to avoid a vulnerability
+
+# Transitive dependency pins — security fixes
+urllib3>=1.26.19
+filelock>=3.20.1
+requests>=2.32.2

@@ -1,8 +1,11 @@
 [![Managed Cloud](https://img.shields.io/badge/Managed_Cloud-aisecuritygateway.ai-blue)](https://aisecuritygateway.ai)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://github.com/aisecuritygateway/aisecuritygateway/blob/main/LICENSE)
+[![CodeQL](https://github.com/aisecuritygateway/aisecuritygateway/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/aisecuritygateway/aisecuritygateway/actions/workflows/github-code-scanning/codeql)
+[![Known Vulnerabilities](https://snyk.io/test/github/aisecuritygateway/aisecuritygateway/badge.svg)](https://snyk.io/test/github/aisecuritygateway/aisecuritygateway)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aisecuritygateway/aisecuritygateway/badge)](https://securityscorecards.dev/viewer/?uri=github.com/aisecuritygateway/aisecuritygateway)
+[![OpenAI Compatible](https://img.shields.io/badge/OpenAI_SDK-Compatible-10a37f?logo=openai&logoColor=white)](https://aisecuritygateway.ai/docs/openai-compatible-proxy)
 [![Star on GitHub](https://img.shields.io/badge/GitHub-Star_⭐-yellow)](https://github.com/aisecuritygateway/aisecuritygateway/stargazers)
 [![Last Commit](https://img.shields.io/github/last-commit/aisecuritygateway/aisecuritygateway)](https://github.com/aisecuritygateway/aisecuritygateway/commits/main)
-[![OpenAI Compatible](https://img.shields.io/badge/OpenAI_SDK-Compatible-10a37f?logo=openai&logoColor=white)](https://aisecuritygateway.ai/docs/openai-compatible-proxy)
 
 # AISG — AI Security Gateway
 
