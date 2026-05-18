@@ -417,4 +417,15 @@ Found a vulnerability? Please read [SECURITY.md](SECURITY.md) for responsible di
 
 ---
 
+## Links
+
+- **Website:** [aisecuritygateway.ai](https://aisecuritygateway.ai)
+- **Docs:** [aisecuritygateway.ai/docs](https://aisecuritygateway.ai/docs)
+- **Crunchbase:** [crunchbase.com/organization/ai-security-gateway](https://www.crunchbase.com/organization/ai-security-gateway)
+- **LinkedIn:** [linkedin.com/company/ai-security-gateway](https://www.linkedin.com/company/ai-security-gateway)
+- **X / Twitter:** [@AISGateway](https://x.com/AISGateway)
+- **Status:** [status.aisecuritygateway.ai](https://status.aisecuritygateway.ai)
+
+---
+
 Built by [Datum Fuse LLC](https://aisecuritygateway.ai) — making AI safe by default.
