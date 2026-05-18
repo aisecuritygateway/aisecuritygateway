@@ -95,7 +95,7 @@ paths:
               example:
                 object: list
                 data:
-                  - id: "oah/llama-3.3-70b-versatile"
+                  - id: "oah/llama-4-maverick"
                     object: model
                     owned_by: ai-security-gateway
                     family: llama
@@ -138,7 +138,7 @@ paths:
             schema:
               $ref: "#/components/schemas/ChatCompletionRequest"
             example:
-              model: "oah/llama-3.3-70b-versatile"
+              model: "oah/llama-4-maverick"
               messages:
                 - role: user
                   content: "Explain the CAP theorem in distributed systems."
@@ -233,8 +233,8 @@ components:
       properties:
         id:
           type: string
-          description: Model identifier (e.g. "oah/llama-3.3-70b-versatile")
-          example: "oah/llama-3.3-70b-versatile"
+          description: Model identifier (e.g. "oah/llama-4-maverick")
+          example: "oah/llama-4-maverick"
         object:
           type: string
           enum: [model]
@@ -296,8 +296,8 @@ components:
           type: string
           description: |
             Model to use. Use `oah/*` prefixed virtual names for Smart Router
-            (e.g. "oah/llama-3.3-70b-versatile") or provider-specific model IDs.
-          example: "oah/llama-3.3-70b-versatile"
+            (e.g. "oah/llama-4-maverick") or provider-specific model IDs.
+          example: "oah/llama-4-maverick"
         messages:
           type: array
           items:
