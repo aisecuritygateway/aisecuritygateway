@@ -99,7 +99,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Explain the CAP theorem in distributed systems.\"\n    }\n  ],\n  \"max_tokens\": 512\n}"
+              "raw": "{\n  \"model\": \"llama-4-maverick\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Explain the CAP theorem in distributed systems.\"\n    }\n  ],\n  \"max_tokens\": 512\n}"
             },
             "url": {
               "raw": "{{base_url}}/v1/chat/completions",
@@ -116,7 +116,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a haiku about cloud security.\"\n    }\n  ],\n  \"stream\": true,\n  \"max_tokens\": 128\n}"
+              "raw": "{\n  \"model\": \"llama-4-maverick\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a haiku about cloud security.\"\n    }\n  ],\n  \"stream\": true,\n  \"max_tokens\": 128\n}"
             },
             "url": {
               "raw": "{{base_url}}/v1/chat/completions",
@@ -139,7 +139,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Send the invoice to john.doe@example.com. His SSN is 123-45-6789.\"\n    }\n  ],\n  \"max_tokens\": 128\n}"
+              "raw": "{\n  \"model\": \"llama-4-maverick\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Send the invoice to john.doe@example.com. His SSN is 123-45-6789.\"\n    }\n  ],\n  \"max_tokens\": 128\n}"
             },
             "url": {
               "raw": "{{base_url}}/v1/chat/completions",
@@ -156,7 +156,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Here's my OpenAI key: sk-proj-abc123xyz456 and my AWS key: AKIAIOSFODNN7EXAMPLE\"\n    }\n  ],\n  \"max_tokens\": 128\n}"
+              "raw": "{\n  \"model\": \"llama-4-maverick\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Here's my OpenAI key: sk-proj-abc123xyz456 and my AWS key: AKIAIOSFODNN7EXAMPLE\"\n    }\n  ],\n  \"max_tokens\": 128\n}"
             },
             "url": {
               "raw": "{{base_url}}/v1/chat/completions",
