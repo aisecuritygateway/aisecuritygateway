@@ -235,6 +235,55 @@ AISG_API_KEY=your-secret-key
 
 ## API Reference
 
+Full machine-readable specs:
+- **[OpenAPI 3.1 Spec](docs/api/openapi.yaml)** — import into any API tool or Swagger UI
+- **[Postman Collection](docs/api/postman-collection.json)** — ready-to-run requests (Postman v2.1)
+
+### `GET /v1/models`
+
+Discover available models programmatically. Returns live data — disabled providers and retired models are excluded in real-time.
+
+```bash
+curl http://localhost:8000/v1/models \
+  -H "Authorization: Bearer your-api-key"
+
+# Filter by family, capability, or provider
+curl "http://localhost:8000/v1/models?family=llama" \
+  -H "Authorization: Bearer your-api-key"
+
+curl "http://localhost:8000/v1/models?capability=vision" \
+  -H "Authorization: Bearer your-api-key"
+```
+
+**Query parameters:**
+
+| Param | Description | Examples |
+|---|---|---|
+| `family` | Filter by model family | `llama`, `gpt`, `claude`, `gemini`, `deepseek` |
+| `capability` | Filter by capability | `vision`, `tools`, `json_mode`, `reasoning` |
+| `provider` | Filter by provider | `together`, `deepinfra`, `openai`, `anthropic` |
+
+**Response:**
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "oah/llama-3.3-70b-versatile",
+      "object": "model",
+      "owned_by": "ai-security-gateway",
+      "family": "llama",
+      "supports_vision": false,
+      "supports_tools": true,
+      "context_window": 131072,
+      "providers": ["together", "deepinfra"],
+      "pricing": { "input_per_1m_tokens": 0.59, "output_per_1m_tokens": 0.79 }
+    }
+  ]
+}
+```
+
 ### `POST /v1/chat/completions`
 
 OpenAI-compatible chat completions endpoint.

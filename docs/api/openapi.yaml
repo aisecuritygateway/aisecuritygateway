@@ -1,0 +1,493 @@
+openapi: "3.1.0"
+info:
+  title: AI Security Gateway API
+  version: "1.0.0"
+  description: |
+    OpenAI-compatible AI Gateway with built-in PII redaction, DLP enforcement,
+    budget caps, and smart cost routing across 60+ models and 8+ providers.
+
+    ## Servers
+
+    - **Self-hosted (OSS):** `http://localhost:8000` — run via Docker Compose
+    - **Managed Cloud:** `https://api.aisecuritygateway.ai` — hosted, 1M free credits
+
+    ## Authentication
+
+    All endpoints require a Bearer token via the `Authorization` header.
+
+    - Self-hosted: use the key defined in your `.env` file
+    - Cloud: Hub key (`os_hub_*`) or Project key (`oah_*`)
+
+    ## Rate Limiting
+
+    10 requests/second per API key (token-bucket).
+
+    ## OpenAI SDK Compatibility
+
+    Point the official OpenAI SDK at the base URL and use your API key —
+    all standard parameters work unchanged.
+  contact:
+    name: AI Security Gateway
+    url: https://aisecuritygateway.ai
+  license:
+    name: Apache-2.0
+    url: https://github.com/aisecuritygateway/aisecuritygateway/blob/main/LICENSE
+
+servers:
+  - url: http://localhost:8000
+    description: Self-hosted (Docker Compose)
+  - url: https://api.aisecuritygateway.ai
+    description: Managed Cloud
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Models
+    description: Discover available models, capabilities, and pricing.
+  - name: Chat
+    description: Generate chat completions with PII redaction and smart routing.
+  - name: Health
+    description: Service health and readiness probes.
+
+paths:
+  /v1/models:
+    get:
+      operationId: listModels
+      summary: List available models
+      description: |
+        Returns all active models from non-disabled providers. Includes
+        pricing, capabilities, and provider information. Data is always
+        fresh — disabled providers and retired models are excluded in
+        real-time.
+
+        Compatible with `openai.models.list()` in the OpenAI SDK.
+      tags: [Models]
+      parameters:
+        - name: family
+          in: query
+          required: false
+          description: Filter by model family (e.g. llama, gpt, claude, gemini, deepseek, mistral, grok, qwen)
+          schema:
+            type: string
+            example: llama
+        - name: capability
+          in: query
+          required: false
+          description: "Filter by capability: vision, tools, json_mode, reasoning"
+          schema:
+            type: string
+            enum: [vision, tools, json_mode, reasoning]
+        - name: provider
+          in: query
+          required: false
+          description: Filter by provider (e.g. together, deepinfra, openai, anthropic, gemini, mistral, xai, bedrock)
+          schema:
+            type: string
+            example: together
+      responses:
+        "200":
+          description: List of available models
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelList"
+              example:
+                object: list
+                data:
+                  - id: "oah/llama-3.3-70b-versatile"
+                    object: model
+                    owned_by: ai-security-gateway
+                    family: llama
+                    supports_vision: false
+                    supports_tools: true
+                    supports_json_mode: true
+                    supports_reasoning: false
+                    context_window: 131072
+                    max_output_tokens: 32768
+                    providers: ["together", "deepinfra"]
+                    pricing:
+                      input_per_1m_tokens: 0.59
+                      output_per_1m_tokens: 0.79
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+  /v1/chat/completions:
+    post:
+      operationId: createChatCompletion
+      summary: Create a chat completion
+      description: |
+        Generates a model response for the given chat messages. Fully
+        compatible with the OpenAI Chat Completions API.
+
+        The request passes through the AI Firewall which:
+        1. Scans for PII (28 entity types) and applies DLP policy (block/redact)
+        2. Enforces budget caps and token limits (Managed Cloud only)
+        3. Routes to the optimal provider via Smart Router (for `oah/*` models, Cloud only)
+
+        Supports streaming via `stream: true` (Server-Sent Events).
+      tags: [Chat]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatCompletionRequest"
+            example:
+              model: "oah/llama-3.3-70b-versatile"
+              messages:
+                - role: user
+                  content: "Explain the CAP theorem in distributed systems."
+              max_tokens: 512
+      responses:
+        "200":
+          description: Chat completion response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatCompletionResponse"
+            text/event-stream:
+              schema:
+                type: string
+                description: SSE stream of chat completion chunks (when stream=true)
+        "400":
+          description: Bad request (unknown model, PII policy violation, vision not supported, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          description: Insufficient wallet balance or no credentials (Managed Cloud only)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "502":
+          description: Provider unreachable or authentication failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "504":
+          description: Provider timeout
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check
+      description: |
+        Liveness/readiness probe. No authentication required.
+        Returns 200 if healthy, 207 if degraded.
+      tags: [Health]
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        API key as Bearer token.
+        - Self-hosted: key from your .env file
+        - Cloud: Hub key (`os_hub_*`) or Project key (`oah_*`)
+
+  schemas:
+    ModelList:
+      type: object
+      properties:
+        object:
+          type: string
+          enum: [list]
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Model"
+
+    Model:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Model identifier (e.g. "oah/llama-3.3-70b-versatile")
+          example: "oah/llama-3.3-70b-versatile"
+        object:
+          type: string
+          enum: [model]
+        owned_by:
+          type: string
+          example: ai-security-gateway
+        family:
+          type: string
+          nullable: true
+          description: Model family (llama, gpt, claude, gemini, etc.)
+          example: llama
+        supports_vision:
+          type: boolean
+          description: Whether the model accepts image inputs
+        supports_tools:
+          type: boolean
+          description: Whether the model supports function/tool calling
+        supports_json_mode:
+          type: boolean
+          description: Whether the model supports JSON output mode
+        supports_reasoning:
+          type: boolean
+          description: Whether the model supports chain-of-thought reasoning
+        context_window:
+          type: integer
+          nullable: true
+          description: Maximum context window in tokens
+          example: 131072
+        max_output_tokens:
+          type: integer
+          nullable: true
+          description: Maximum output tokens
+          example: 32768
+        providers:
+          type: array
+          items:
+            type: string
+          description: Available providers for this model
+          example: ["together", "deepinfra"]
+        pricing:
+          type: object
+          properties:
+            input_per_1m_tokens:
+              type: number
+              nullable: true
+              description: Input cost per 1M tokens (USD, Managed Cloud only)
+              example: 0.59
+            output_per_1m_tokens:
+              type: number
+              nullable: true
+              description: Output cost per 1M tokens (USD, Managed Cloud only)
+              example: 0.79
+
+    ChatCompletionRequest:
+      type: object
+      required: [model, messages]
+      properties:
+        model:
+          type: string
+          description: |
+            Model to use. Use `oah/*` prefixed virtual names for Smart Router
+            (e.g. "oah/llama-3.3-70b-versatile") or provider-specific model IDs.
+          example: "oah/llama-3.3-70b-versatile"
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+          minItems: 1
+        stream:
+          type: boolean
+          default: false
+          description: If true, returns a stream of Server-Sent Events
+        max_tokens:
+          type: integer
+          description: Maximum tokens to generate
+          example: 512
+        temperature:
+          type: number
+          minimum: 0
+          maximum: 2
+          description: Sampling temperature
+        top_p:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Nucleus sampling parameter
+        stop:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          description: Stop sequences
+        tools:
+          type: array
+          items:
+            type: object
+          description: List of tools/functions the model can call
+        tool_choice:
+          description: Controls tool calling behavior
+        response_format:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [text, json_object]
+
+    ChatMessage:
+      type: object
+      required: [role, content]
+      properties:
+        role:
+          type: string
+          enum: [system, user, assistant, tool]
+        content:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum: [text, image_url]
+                  text:
+                    type: string
+                  image_url:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+          description: Message content (string or array for multi-modal)
+
+    ChatCompletionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "chatcmpl-abc123"
+        object:
+          type: string
+          enum: [chat.completion]
+        created:
+          type: integer
+        model:
+          type: string
+        choices:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+              message:
+                type: object
+                properties:
+                  role:
+                    type: string
+                  content:
+                    type: string
+              finish_reason:
+                type: string
+                enum: [stop, length, tool_calls]
+        usage:
+          type: object
+          properties:
+            prompt_tokens:
+              type: integer
+            completion_tokens:
+              type: integer
+            total_tokens:
+              type: integer
+        aisg_metadata:
+          type: object
+          description: AISG-specific metadata (routing, cost, latency, DLP)
+          properties:
+            request_id:
+              type: string
+            provider:
+              type: string
+            model:
+              type: string
+            latency_ms:
+              type: number
+            dlp_latency_ms:
+              type: number
+            pii_detected:
+              type: boolean
+            cost_usd:
+              type: number
+
+    ErrorResponse:
+      type: object
+      properties:
+        detail:
+          oneOf:
+            - type: string
+            - type: object
+              properties:
+                error:
+                  type: string
+                  description: Error code
+                message:
+                  type: string
+                  description: Human-readable error message
+                suggested_model:
+                  type: string
+                  description: Suggested alternative model (if applicable)
+                suggested_models:
+                  type: array
+                  items:
+                    type: string
+                  description: List of suggested alternative models
+                docs_url:
+                  type: string
+                  description: Link to relevant documentation
+
+  responses:
+    Unauthorized:
+      description: Missing API key
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Missing API key"
+    Forbidden:
+      description: Invalid or revoked API key
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              detail:
+                type: string
+                example: "Invalid or revoked API key"
+    RateLimited:
+      description: Rate limit exceeded (10 requests/second)
+      headers:
+        Retry-After:
+          schema:
+            type: string
+            example: "1"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: rate_limit_exceeded
+              message:
+                type: string
+                example: "Too many requests. Limit: 10 requests/second. Please slow down and retry."

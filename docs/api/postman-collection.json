@@ -1,0 +1,191 @@
+{
+  "info": {
+    "name": "AI Security Gateway API",
+    "_postman_id": "aisg-oss-collection-v1",
+    "description": "API collection for AI Security Gateway — the AI Firewall & Governance Gateway.\n\nDefault Base URL: http://localhost:8000 (self-hosted via Docker Compose)\nManaged Cloud: https://api.aisecuritygateway.ai\n\nAuthentication: Bearer token.\n\nAll requests go through the AI Firewall, which scans for PII, prompt injections, and enforces DLP policies before forwarding to the LLM provider.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_key}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "change-me-to-a-real-secret",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Models",
+      "description": "Discover available models programmatically. Returns live data — disabled providers and retired models are excluded in real-time.",
+      "item": [
+        {
+          "name": "List All Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/models",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "models"]
+            },
+            "description": "Returns all available models with pricing, capabilities, and provider information.\n\nResponse includes extended fields beyond the OpenAI spec: `providers`, `pricing`, `supports_vision`, `supports_tools`, `supports_reasoning`, `family`, `context_window`, and `max_output_tokens`.\n\nExpected: 200 OK with `{ \"object\": \"list\", \"data\": [...] }`"
+          }
+        },
+        {
+          "name": "Filter by Family (Llama)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/models?family=llama",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "models"],
+              "query": [{ "key": "family", "value": "llama" }]
+            },
+            "description": "Filter models by family name. Common families: llama, gpt, claude, gemini, deepseek, mistral, grok, qwen.\n\nExpected: 200 OK with only models from the specified family."
+          }
+        },
+        {
+          "name": "Filter by Capability (Vision)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/models?capability=vision",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "models"],
+              "query": [{ "key": "capability", "value": "vision" }]
+            },
+            "description": "Filter by model capability. Supported values: vision, tools, json_mode, reasoning.\n\nExpected: 200 OK with only models that support the specified capability."
+          }
+        },
+        {
+          "name": "Filter by Provider",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/models?provider=together",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "models"],
+              "query": [{ "key": "provider", "value": "together" }]
+            },
+            "description": "Filter by provider. Supported values: together, deepinfra, openai, anthropic, gemini, mistral, xai, bedrock.\n\nExpected: 200 OK with only models available from the specified provider."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chat Completions",
+      "item": [
+        {
+          "name": "Basic Completion",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Explain the CAP theorem in distributed systems.\"\n    }\n  ],\n  \"max_tokens\": 512\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "chat", "completions"]
+            },
+            "description": "Basic chat completion request.\n\nExpected: 200 OK with an OpenAI-compatible response body plus `aisg_metadata` containing DLP scan details."
+          }
+        },
+        {
+          "name": "Streaming (SSE)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a haiku about cloud security.\"\n    }\n  ],\n  \"stream\": true,\n  \"max_tokens\": 128\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "chat", "completions"]
+            },
+            "description": "Streaming request. The AI Firewall scans the full request for PII, then streams the response as Server-Sent Events (SSE).\n\nExpected: 200 OK with Content-Type: text/event-stream"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Security Tests",
+      "description": "Requests designed to trigger the AI Firewall's DLP defenses.",
+      "item": [
+        {
+          "name": "PII Detection — Email + SSN (Should Redact)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Send the invoice to john.doe@example.com. His SSN is 123-45-6789.\"\n    }\n  ],\n  \"max_tokens\": 128\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "chat", "completions"]
+            },
+            "description": "Contains PII entities: email and SSN.\n\nDefault policy (REDACT): 200 OK — PII replaced with [REDACTED] before reaching the LLM.\n\nExpected response includes aisg_metadata.pii_detected: true"
+          }
+        },
+        {
+          "name": "Secret Detection — API Key (Should Redact)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Here's my OpenAI key: sk-proj-abc123xyz456 and my AWS key: AKIAIOSFODNN7EXAMPLE\"\n    }\n  ],\n  \"max_tokens\": 128\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/chat/completions",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "chat", "completions"]
+            },
+            "description": "Contains developer secrets: OpenAI API key and AWS access key.\n\nExpected: 200 OK with secrets redacted before forwarding."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Liveness / readiness probe. No authentication required.\n\nExpected: 200 OK with {\"status\": \"healthy\"}"
+          }
+        }
+      ]
+    }
+  ]
+}
