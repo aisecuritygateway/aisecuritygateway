@@ -434,6 +434,9 @@ This repo gives you the core AI security proxy. The managed [AI Security Gateway
 | Dashboards, leak reports & analytics | — | Yes |
 | Real-time model pricing registry | — | Yes |
 | Managed provider keys (no BYOK required) | — | Yes |
+| Recursive loop protection (agent retry kill) | — | Yes |
+| Webhook security alerts (HMAC-signed) | — | Yes |
+| EU AI Act compliance logging (hash-chained) | — | Yes |
 | SLA & support | Community | Yes |
 
 [Try the managed cloud free &rarr;](https://aisecuritygateway.ai) — 1M free credits, no credit card required.
