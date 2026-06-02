@@ -4,9 +4,21 @@
 
 providers:
   groq:
-    api_key: "${GROQ_API_KEY}"
+    api_key: "${GROQ_API_KEY:-}"
   openai:
     api_key: "${OPENAI_API_KEY:-}"
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY:-}"
+  together:
+    api_key: "${TOGETHER_API_KEY:-}"
+  gemini:
+    api_key: "${GEMINI_API_KEY:-}"
+  mistral:
+    api_key: "${MISTRAL_API_KEY:-}"
+  deepinfra:
+    api_key: "${DEEPINFRA_API_KEY:-}"
+  xai:
+    api_key: "${XAI_API_KEY:-}"
 
 api_keys:
   - key: "${AISG_API_KEY:-dev-key-change-me}"
