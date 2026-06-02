@@ -7,7 +7,37 @@
     },
     "openai": {
       "litellm_prefix": "openai",
-      "default_model": "gpt-4o-mini",
+      "default_model": "gpt-4.1-mini",
+      "enabled": true
+    },
+    "anthropic": {
+      "litellm_prefix": "anthropic",
+      "default_model": "claude-sonnet-4-6-20260217",
+      "enabled": true
+    },
+    "together": {
+      "litellm_prefix": "together_ai",
+      "default_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      "enabled": true
+    },
+    "gemini": {
+      "litellm_prefix": "gemini",
+      "default_model": "gemini-2.5-flash",
+      "enabled": true
+    },
+    "mistral": {
+      "litellm_prefix": "mistral",
+      "default_model": "mistral-large-latest",
+      "enabled": true
+    },
+    "deepinfra": {
+      "litellm_prefix": "deepinfra",
+      "default_model": "meta-llama/Llama-3.3-70B-Instruct",
+      "enabled": true
+    },
+    "xai": {
+      "litellm_prefix": "xai",
+      "default_model": "grok-3-mini",
       "enabled": true
     }
   }
