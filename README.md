@@ -465,6 +465,7 @@ This repo gives you the core AI security proxy. The managed [AI Security Gateway
 | Managed provider keys (no BYOK required) | — | Yes |
 | Semantic caching (DLP-aware) | — | Yes |
 | Recursive loop protection (agent retry kill) | — | Yes |
+| Webhook security alerts (HMAC-signed) | — | Yes |
 | EU AI Act compliance logging (hash-chained) | — | Yes |
 | SLA & support | Community | Yes |
 
