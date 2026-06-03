@@ -23,7 +23,7 @@ AISG is a vendor-neutral AI governance layer that sits between your application 
 - **Secret detection** — API keys, AWS credentials, GitHub tokens, private keys
 - **Prompt injection blocking** — detects jailbreak and instruction override attempts
 - **OpenAI SDK compatible** — drop-in replacement, change one line of code
-- **Multi-provider routing** — BYOK, swap providers in config
+- **Multi-provider routing** — 8 providers out of the box: OpenAI, Anthropic, Groq, Together, Gemini, Mistral, DeepInfra, xAI — BYOK, swap in config
 - **Fail-closed by default** — if the safety layer is down, requests are blocked, never forwarded unscanned
 - **Zero cloud dependencies** — runs entirely on your machine via Docker
 - **No telemetry** — zero external calls, no analytics, no phone-home
@@ -49,7 +49,7 @@ Your App  ──▸  AISG Gateway  ──▸  Presidio (PII scan)  ──▸  LL
 
 ---
 
-> ☁️ **Want it managed?** Skip Docker entirely → [aisecuritygateway.ai](https://aisecuritygateway.ai) — 1M free credits, no credit card, 600+ models, 8+ providers.
+> ☁️ **Want it managed?** Skip Docker entirely → [aisecuritygateway.ai](https://aisecuritygateway.ai) — 1M free credits, no credit card, 600+ models, smart routing, semantic caching, and EU AI Act compliance logging.
 
 ---
 
@@ -68,12 +68,21 @@ cd aisecuritygateway
 cp .env.example .env
 ```
 
-Edit `.env` and add at least one provider key:
+Edit `.env` and add at least one provider key (any provider with a key is available):
 
 ```
 GROQ_API_KEY=gsk_your_key_here
+OPENAI_API_KEY=sk-your_key_here
+ANTHROPIC_API_KEY=sk-ant-your_key_here
+TOGETHER_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
+MISTRAL_API_KEY=your_key_here
+DEEPINFRA_API_KEY=your_key_here
+XAI_API_KEY=your_key_here
 AISG_API_KEY=change-me-to-a-real-secret
 ```
+
+You only need one provider key to get started — the gateway routes to any provider with a configured key.
 
 **2. Start**
 
@@ -123,7 +132,7 @@ print(response.choices[0].message.content)
 ---
 
 > **Skip the setup?** The managed version at [aisecuritygateway.ai](https://aisecuritygateway.ai)
-> gives you everything here plus dashboards, multi-project policies, smart cost routing, and 8+ providers —
+> gives you everything here plus dashboards, multi-project policies, smart cost routing, semantic caching, EU AI Act compliance logging, and recursive loop protection —
 > no Docker required. 1M free credits, no credit card.
 
 ---
@@ -136,7 +145,7 @@ print(response.choices[0].message.content)
     ┌──────────┐           │                              │           ┌──────────────┐
     │          │  POST     │  1. Auth (API key)           │           │              │
     │ Your App ├──────────▸│  2. Resolve provider/model   │──────────▸│ LLM Provider │
-    │          │           │  3. DLP scan (Presidio)      │           │ (Groq/OpenAI)│
+    │          │           │  3. DLP scan (Presidio)      │           │  (8 supported)│
     │          │◂──────────│  4. Block or redact           │◂──────────│              │
     └──────────┘  response │  5. Forward to upstream      │  response └──────────────┘
                            │  6. Return with metadata     │
@@ -168,9 +177,21 @@ All config lives in three files:
 ```yaml
 providers:
   groq:
-    api_key: "${GROQ_API_KEY}"
+    api_key: "${GROQ_API_KEY:-}"
   openai:
     api_key: "${OPENAI_API_KEY:-}"
+  anthropic:
+    api_key: "${ANTHROPIC_API_KEY:-}"
+  together:
+    api_key: "${TOGETHER_API_KEY:-}"
+  gemini:
+    api_key: "${GEMINI_API_KEY:-}"
+  mistral:
+    api_key: "${MISTRAL_API_KEY:-}"
+  deepinfra:
+    api_key: "${DEEPINFRA_API_KEY:-}"
+  xai:
+    api_key: "${XAI_API_KEY:-}"
 
 api_keys:
   - key: "${AISG_API_KEY:-dev-key-change-me}"
@@ -204,16 +225,14 @@ Defines which LLM providers are available and their LiteLLM mapping:
 ```json
 {
   "providers": {
-    "groq": {
-      "litellm_prefix": "groq",
-      "default_model": "llama-3.3-70b-versatile",
-      "enabled": true
-    },
-    "openai": {
-      "litellm_prefix": "openai",
-      "default_model": "gpt-4o-mini",
-      "enabled": true
-    }
+    "groq": { "litellm_prefix": "groq", "default_model": "llama-3.3-70b-versatile", "enabled": true },
+    "openai": { "litellm_prefix": "openai", "default_model": "gpt-4.1-mini", "enabled": true },
+    "anthropic": { "litellm_prefix": "anthropic", "default_model": "claude-sonnet-4-6-20260217", "enabled": true },
+    "together": { "litellm_prefix": "together_ai", "default_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo", "enabled": true },
+    "gemini": { "litellm_prefix": "gemini", "default_model": "gemini-2.5-flash", "enabled": true },
+    "mistral": { "litellm_prefix": "mistral", "default_model": "mistral-large-latest", "enabled": true },
+    "deepinfra": { "litellm_prefix": "deepinfra", "default_model": "meta-llama/Llama-3.3-70B-Instruct", "enabled": true },
+    "xai": { "litellm_prefix": "xai", "default_model": "grok-3-mini", "enabled": true }
   }
 }
 ```
@@ -226,8 +245,17 @@ Runtime environment variables referenced by `gateway.yaml`:
 GATEWAY_PORT=8000
 LOG_LEVEL=info
 PRESIDIO_WORKERS=1
+
+# Add any provider keys you have — leave blank to skip
 GROQ_API_KEY=gsk_...
 OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+TOGETHER_API_KEY=...
+GEMINI_API_KEY=...
+MISTRAL_API_KEY=...
+DEEPINFRA_API_KEY=...
+XAI_API_KEY=...
+
 AISG_API_KEY=your-secret-key
 ```
 
@@ -294,7 +322,7 @@ OpenAI-compatible chat completions endpoint.
 |---|---|---|
 | `Authorization` | Yes | `Bearer <your-gateway-api-key>` |
 | `Content-Type` | Yes | `application/json` |
-| `x-provider` | No | Override default provider (`groq`, `openai`) |
+| `x-provider` | No | Override default provider (`groq`, `openai`, `anthropic`, `together`, `gemini`, `mistral`, `deepinfra`, `xai`) |
 | `x-model` | No | Override default model |
 
 **Request body:** Standard OpenAI chat completion format.
@@ -406,7 +434,7 @@ aisecuritygateway/
 
 ## Smart Routing: OSS vs Cloud
 
-**OSS (self-hosted):** Simple, reliable routing using the `x-provider` and `x-model` headers. You pick the provider and model — the gateway forwards directly using your own keys via LiteLLM. Great for development and small teams.
+**OSS (self-hosted):** Route to any of 8 providers using the `x-provider` and `x-model` headers — OpenAI, Anthropic, Groq, Together, Gemini, Mistral, DeepInfra, and xAI. You pick the provider and model, the gateway forwards using your own keys via LiteLLM. Add a provider key, and it's available immediately.
 
 **Cloud (managed):** Full Smart Router with real-time cost optimization, dynamic provider selection (cheapest + fastest for each request), automatic failover chains, live pricing registry, and per-project budget policies. No manual configuration needed.
 
@@ -420,10 +448,11 @@ This repo gives you the core AI security proxy. The managed [AI Security Gateway
 
 | | OSS (this repo) | Cloud |
 |---|:---:|:---:|
-| PII detection & redaction (text) | 13 entity types | 28+ entity types |
+| PII detection & redaction (text) | 13 entity types | 30+ entity types |
 | OCR image scanning | — | Yes |
 | Secret leak prevention | 5 recognizers | Extended (incl. AWS Secret Key, crypto, MAC) |
 | Prompt injection blocking | 5 core patterns | Extended pattern library |
+| Providers | 8 (OpenAI, Anthropic, Groq, Together, Gemini, Mistral, DeepInfra, xAI) | 8+ with managed keys |
 | Routing | Header-based (`x-provider`) | Smart Router + real-time pricing |
 | Failover | — | Automatic intelligent chains |
 | Cost optimization | — | Automatic (cheapest per request) |
@@ -434,6 +463,10 @@ This repo gives you the core AI security proxy. The managed [AI Security Gateway
 | Dashboards, leak reports & analytics | — | Yes |
 | Real-time model pricing registry | — | Yes |
 | Managed provider keys (no BYOK required) | — | Yes |
+| Semantic caching (DLP-aware) | — | Yes |
+| Recursive loop protection (agent retry kill) | — | Yes |
+| Webhook security alerts (HMAC-signed) | — | Yes |
+| EU AI Act compliance logging (hash-chained) | — | Yes |
 | SLA & support | Community | Yes |
 
 [Try the managed cloud free &rarr;](https://aisecuritygateway.ai) — 1M free credits, no credit card required.
