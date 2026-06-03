@@ -438,6 +438,20 @@ This repo gives you the core AI security proxy. The managed [AI Security Gateway
 
 [Try the managed cloud free &rarr;](https://aisecuritygateway.ai) — 1M free credits, no credit card required.
 
+### Why are some features cloud-only?
+
+Three features — **loop protection**, **EU AI Act logging**, and **semantic caching** — are available only in the managed cloud. This isn't an artificial paywall. Each one requires distributed infrastructure that a single self-hosted instance can't provide correctly:
+
+| Cloud Feature | Why It Needs Cloud Infrastructure |
+|---|---|
+| **Recursive loop protection** | Detects and kills runaway agent loops by tracking request fingerprints across all proxy instances in real time. This requires a shared distributed store (Redis) to coordinate state across horizontally-scaled proxies. A single-instance approximation would miss cross-instance loops — the exact failure mode you'd want to catch. |
+| **EU AI Act compliance logging** | Produces hash-chained, tamper-evident audit trails with append-only WORM storage, configurable retention policies, and secure export. Running this correctly requires managed storage with access controls and chain-integrity verification — the operational burden of self-hosting compliant audit infrastructure is exactly what regulated teams pay to avoid. |
+| **Semantic caching** | Caches LLM responses keyed on DLP-cleaned prompts across all proxy instances. Requires a distributed cache backend with TTL management, eviction policies, and cross-instance coherence. A local in-process cache would only help a single instance and couldn't deduplicate across a fleet. |
+
+The OSS version — PII redaction, prompt injection blocking, secret detection, fail-closed architecture, 8-provider routing — is a **complete, production-ready security proxy**. You can self-host it and get real value without the cloud. The cloud adds the operational features that production teams with compliance, reliability, and scale requirements need.
+
+We're committed to growing the OSS over time. The 8-provider expansion (up from 2 at launch) is one example — if a feature doesn't require distributed infrastructure, it belongs in the OSS.
+
 ---
 
 ## Featured On
