@@ -9,7 +9,7 @@
 
 # AISG — AI Security Gateway
 
-### Open-source AI firewall & LLM proxy with built-in PII redaction, prompt injection blocking, and secret leak prevention.
+### Open-source AI firewall & LLM proxy with built-in PII redaction, prompt injection blocking, secret leak prevention, and enterprise governance (SSO, RBAC, SIEM).
 
 AISG is a vendor-neutral AI governance layer that sits between your application and any LLM provider. It scans every request for sensitive data and attacks — and redacts or blocks them before anything reaches the model. Self-hosted via Docker, OpenAI SDK compatible, Apache 2.0.
 
@@ -27,6 +27,10 @@ AISG is a vendor-neutral AI governance layer that sits between your application 
 - **Fail-closed by default** — if the safety layer is down, requests are blocked, never forwarded unscanned
 - **Zero cloud dependencies** — runs entirely on your machine via Docker
 - **No telemetry** — zero external calls, no analytics, no phone-home
+- **SAML SSO** — Okta, Azure AD, Google Workspace, and any SAML 2.0 IdP (cloud)
+- **RBAC** — 4-tier role hierarchy (Owner/Admin/Member/Viewer) with 17 granular permissions (cloud)
+- **SIEM connectors** — stream security events to Splunk HEC, Datadog Logs, or Microsoft Sentinel (cloud)
+- **Hybrid VPC deployment** — compiled Go proxy in your network, prompts never leave your VPC (cloud)
 
 ```
 Your App  ──▸  AISG Gateway  ──▸  Presidio (PII scan)  ──▸  LLM Provider
@@ -46,10 +50,12 @@ Your App  ──▸  AISG Gateway  ──▸  Presidio (PII scan)  ──▸  LL
 | **Internal AI tools for your team** | Stop employees from accidentally pasting secrets, credentials, or customer data |
 | **Regulated industries (healthcare, finance, legal)** | Auditable DLP layer that blocks sensitive data before it leaves your infrastructure |
 | **AI agent / RAG pipelines** | Scan every step of multi-hop agent calls for PII and injection attacks |
+| **Enterprise teams requiring SSO/RBAC** | SAML SSO with Okta, Azure AD, Google Workspace — auto-provisioning, enforced SSO, 4-tier RBAC |
+| **Security operations (SOC) teams** | Stream PII blocks, injection attempts, and budget alerts to Splunk, Datadog, or Sentinel via native SIEM connectors |
 
 ---
 
-> ☁️ **Want it managed?** Skip Docker entirely → [aisecuritygateway.ai](https://aisecuritygateway.ai) — 1M free credits, no credit card, 600+ models, smart routing, semantic caching, and EU AI Act compliance logging.
+> ☁️ **Want it managed?** Skip Docker entirely → [aisecuritygateway.ai](https://aisecuritygateway.ai) — 1M free credits, no credit card, 600+ models, smart routing, SAML SSO, RBAC, SIEM connectors, Hybrid VPC, and EU AI Act compliance logging.
 
 ---
 
@@ -132,7 +138,7 @@ print(response.choices[0].message.content)
 ---
 
 > **Skip the setup?** The managed version at [aisecuritygateway.ai](https://aisecuritygateway.ai)
-> gives you everything here plus dashboards, multi-project policies, smart cost routing, semantic caching, EU AI Act compliance logging, and recursive loop protection —
+> gives you everything here plus dashboards, SAML SSO, RBAC, SIEM connectors, Hybrid VPC deployment, smart cost routing, semantic caching, EU AI Act compliance logging, and recursive loop protection —
 > no Docker required. 1M free credits, no credit card.
 
 ---
@@ -463,13 +469,17 @@ This repo gives you the core AI security proxy. The managed [AI Security Gateway
 | Dashboards, leak reports & analytics | — | Yes |
 | Real-time model pricing registry | — | Yes |
 | Managed provider keys (no BYOK required) | — | Yes |
+| SAML SSO (Okta, Azure AD, Google Workspace) | — | Yes |
+| RBAC (Owner/Admin/Member/Viewer, 17 permissions) | — | Yes |
+| SIEM connectors (Splunk, Datadog, Sentinel) | — | Yes |
+| Hybrid VPC deployment (prompts stay in your network) | — | Yes |
 | Semantic caching (DLP-aware) | — | Yes |
 | Recursive loop protection (agent retry kill) | — | Yes |
 | Webhook security alerts (HMAC-signed) | — | Yes |
 | EU AI Act compliance logging (hash-chained) | — | Yes |
 | SLA & support | Community | Yes |
 
-[Try the managed cloud free &rarr;](https://aisecuritygateway.ai) — 1M free credits, no credit card required.
+[Try the managed cloud free &rarr;](https://aisecuritygateway.ai) — 1M free credits, no credit card required. Includes SSO, RBAC, SIEM, and Hybrid VPC.
 
 ### Why are some features cloud-only?
 
@@ -480,6 +490,10 @@ Three features — **loop protection**, **EU AI Act logging**, and **semantic ca
 | **Recursive loop protection** | Detects and kills runaway agent loops by tracking request fingerprints across all proxy instances in real time. This requires a shared distributed store (Redis) to coordinate state across horizontally-scaled proxies. A single-instance approximation would miss cross-instance loops — the exact failure mode you'd want to catch. |
 | **EU AI Act compliance logging** | Produces hash-chained, tamper-evident audit trails with append-only WORM storage, configurable retention policies, and secure export. Running this correctly requires managed storage with access controls and chain-integrity verification — the operational burden of self-hosting compliant audit infrastructure is exactly what regulated teams pay to avoid. |
 | **Semantic caching** | Caches LLM responses keyed on DLP-cleaned prompts across all proxy instances. Requires a distributed cache backend with TTL management, eviction policies, and cross-instance coherence. A local in-process cache would only help a single instance and couldn't deduplicate across a fleet. |
+
+**Enterprise features** — SAML SSO, RBAC, and SIEM connectors — are cloud-only because they require a centralized identity store, organization-level metadata, and persistent event streaming infrastructure. SSO requires a dedicated SAML service provider and connection metadata storage. RBAC needs a shared permission model across the organization. SIEM connectors need reliable, authenticated event delivery with retry logic and secret management. These are inherently multi-tenant, stateful services.
+
+**Hybrid VPC** bridges the gap: a compiled Go proxy runs inside your VPC so prompts never leave your network, while the cloud dashboard manages SSO, RBAC, policies, and analytics via metadata-only telemetry. Deploy via Docker Compose or Kubernetes.
 
 The OSS version — PII redaction, prompt injection blocking, secret detection, fail-closed architecture, 8-provider routing — is a **complete, production-ready security proxy**. You can self-host it and get real value without the cloud. The cloud adds the operational features that production teams with compliance, reliability, and scale requirements need.
 
@@ -520,6 +534,10 @@ Found a vulnerability? Please read [SECURITY.md](SECURITY.md) for responsible di
 - **Crunchbase:** [crunchbase.com/organization/ai-security-gateway](https://www.crunchbase.com/organization/ai-security-gateway)
 - **LinkedIn:** [linkedin.com/company/ai-security-gateway](https://www.linkedin.com/company/ai-security-gateway)
 - **X / Twitter:** [@AISGateway](https://x.com/AISGateway)
+- **SAML SSO Docs:** [aisecuritygateway.ai/docs/saml-sso-authentication](https://aisecuritygateway.ai/docs/saml-sso-authentication)
+- **RBAC Docs:** [aisecuritygateway.ai/docs/rbac-team-management](https://aisecuritygateway.ai/docs/rbac-team-management)
+- **SIEM Docs:** [aisecuritygateway.ai/docs/siem-connectors](https://aisecuritygateway.ai/docs/siem-connectors)
+- **Hybrid VPC Docs:** [aisecuritygateway.ai/docs/hybrid-vpc-deployment](https://aisecuritygateway.ai/docs/hybrid-vpc-deployment)
 - **Status:** [status.aisecuritygateway.ai](https://status.aisecuritygateway.ai)
 
 ---

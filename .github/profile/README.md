@@ -8,7 +8,7 @@
 
 <p align="center">
   Stop sensitive data from leaking into LLM prompts. Drop-in OpenAI SDK compatible.<br />
-  PII redaction · Secret detection · Prompt injection blocking · Self-hosted via Docker · Apache 2.0
+  PII redaction · Secret detection · Prompt injection blocking · SSO · RBAC · SIEM · Hybrid VPC · Apache 2.0
 </p>
 
 <p align="center">
@@ -34,7 +34,7 @@
     ┌──────────┐           │                              │           ┌──────────────┐
     │          │  POST     │  1. Auth (API key)           │           │              │
     │ Your App ├──────────▸│  2. Resolve provider/model   │──────────▸│ LLM Provider │
-    │          │           │  3. DLP scan (Presidio)      │           │ (Groq/OpenAI)│
+    │          │           │  3. DLP scan (Presidio)      │           │ (8 supported) │
     │          │◂──────────│  4. Block or redact           │◂──────────│              │
     └──────────┘  response │  5. Forward to upstream      │  response └──────────────┘
                            │  6. Return with metadata     │
@@ -58,6 +58,10 @@ AISG is an **OpenAI-compatible proxy** that acts as an AI firewall. It sits betw
 - **Fail-Closed Security** — if the safety layer is down, requests are **blocked**, never forwarded unscanned
 - **Zero Cloud Dependencies** — runs entirely on your machine via Docker
 - **No Telemetry** — zero external calls, no analytics, no phone-home
+- **SAML SSO** — Okta, Azure AD, Google Workspace, any SAML 2.0 IdP with auto-provisioning (cloud)
+- **RBAC** — 4-tier roles (Owner/Admin/Member/Viewer), 17 granular permissions (cloud)
+- **SIEM Connectors** — stream events to Splunk HEC, Datadog Logs, or Microsoft Sentinel (cloud)
+- **Hybrid VPC** — compiled Go proxy in your VPC, prompts never leave your network (cloud)
 
 ---
 
@@ -95,7 +99,7 @@ The gateway redacts the email and SSN before forwarding. The response includes `
 | `PERSON`, `LOCATION` | `SLACK_WEBHOOK` | Developer mode exploits |
 | `IP_ADDRESS` | | |
 
-**13 entity types** out of the box — the [managed cloud](https://aisecuritygateway.ai) extends this to **28+** with OCR image scanning.
+**13 entity types** out of the box — the [managed cloud](https://aisecuritygateway.ai) extends this to **30+** with OCR image scanning.
 
 ---
 
@@ -106,6 +110,16 @@ The gateway redacts the email and SSN before forwarding. The response includes `
 - **No telemetry** — zero external calls, no analytics, no phone-home
 - **Secret scrubbing** — structured logs automatically mask API keys and tokens
 - **Rate limiting** — token bucket per API key (default 10 req/sec)
+
+---
+
+## Deployment Options
+
+| Mode | Description |
+|---|---|
+| **Open Source** | Self-hosted via Docker Compose. Full PII redaction + 8-provider routing. Apache 2.0. |
+| **Managed Cloud** | Zero-ops SaaS. 600+ models, smart routing, dashboards, budgets, compliance. |
+| **Hybrid VPC** | Compiled Go proxy in your VPC. Prompts never leave your network. Cloud dashboard for policies, SSO, and analytics via metadata-only telemetry. |
 
 ---
 
@@ -129,9 +143,17 @@ This repo gives you the core AI security proxy. The managed [AI Security Gateway
 | Dashboards, leak reports & analytics | — | Yes |
 | Real-time model pricing registry | — | Yes |
 | Managed provider keys (no BYOK required) | — | Yes |
+| Semantic caching (DLP-aware) | — | Yes |
+| Recursive loop protection (agent retry kill) | — | Yes |
+| Webhook security alerts (HMAC-signed) | — | Yes |
+| EU AI Act compliance logging (hash-chained) | — | Yes |
+| SAML SSO (Okta, Azure AD, Google Workspace) | — | Yes |
+| RBAC (Owner/Admin/Member/Viewer, 17 permissions) | — | Yes |
+| SIEM connectors (Splunk, Datadog, Sentinel) | — | Yes |
+| Hybrid VPC (prompts stay in your network) | — | Yes |
 | SLA & support | Community | Yes |
 
-> **Skip the setup?** [aisecuritygateway.ai](https://aisecuritygateway.ai) — everything here plus dashboards, smart cost routing, and 8+ providers. 1M free credits, no credit card.
+> **Skip the setup?** [aisecuritygateway.ai](https://aisecuritygateway.ai) — everything here plus SSO, RBAC, SIEM, Hybrid VPC, dashboards, smart cost routing, and 600+ models. 1M free credits, no credit card.
 
 ---
 
