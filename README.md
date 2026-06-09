@@ -135,6 +135,27 @@ print(response.choices[0].message.content)
 # The LLM never saw the SSN — it was redacted before forwarding.
 ```
 
+**5. Or use the AISG Python SDK**
+
+```bash
+pip install aisg
+```
+
+```python
+from aisg import AISG
+
+client = AISG(api_key="your-gateway-key", base_url="http://localhost:8000/v1")
+
+response = client.chat.create(
+    model="llama-3.3-70b-versatile",
+    messages=[{"role": "user", "content": "My SSN is 123-45-6789"}],
+)
+print(response.aisg_metadata.pii_detected)        # True
+print(response.aisg_metadata.entity_types_detected) # ["US_SSN"]
+```
+
+The SDK adds typed responses, structured error handling (`DLPBlockError`, `BudgetExhaustedError`, `LoopDetectedError`), async support, and model discovery. Works with both self-hosted and [managed cloud](https://aisecuritygateway.ai) deployments. → [Full SDK docs](sdk/python/README.md)
+
 ---
 
 > **Skip the setup?** The managed version at [aisecuritygateway.ai](https://aisecuritygateway.ai)

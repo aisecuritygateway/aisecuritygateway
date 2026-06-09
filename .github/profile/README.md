@@ -86,6 +86,25 @@ curl http://localhost:8000/v1/chat/completions \
 
 The gateway redacts the email and SSN before forwarding. The response includes `aisg_metadata.pii_detected: true`.
 
+### Python SDK
+
+```bash
+pip install aisg
+```
+
+```python
+from aisg import AISG
+
+client = AISG(api_key="your-gateway-key", base_url="http://localhost:8000/v1")
+response = client.chat.create(
+    model="llama-3.3-70b-versatile",
+    messages=[{"role": "user", "content": "My email is alice@acme.com"}],
+)
+print(response.aisg_metadata.pii_detected)  # True
+```
+
+Typed responses, structured errors, async support, and model discovery. → [Full SDK docs](https://github.com/aisecuritygateway/aisecuritygateway/tree/main/sdk/python)
+
 ---
 
 ## What Gets Detected
